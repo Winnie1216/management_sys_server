@@ -24,6 +24,7 @@ exports.regUser = (req, res) => {
             return res.cc('用户名已被占用，请更换其他用户名')
         }
         userInfo.password = bcrypt.hashSync(userInfo.password, 10)
+        // console.log(userInfo.password);
         //定义插入的sql语句
         const sql = 'insert into ev_users set?'
         db.query(sql, { username: userInfo.username, password: userInfo.password }, (err, results) => {
@@ -51,7 +52,7 @@ exports.login = (req, res) => {
         }
         const compaRerResults = bcrypt.compareSync(userInfo.password, results[0].password)
         if (!compaRerResults) {
-            return res.cc('登录失败')
+            return res.cc('登录密码不对')
         }
         // res.cc('登陆成功', 0)
         const user = { ...results[0], password: '', user_pic: '' }

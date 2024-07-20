@@ -18,7 +18,7 @@ exports.getUserInfo = (req, res) => {
 }
 exports.updateUserInfo = (req, res) => {
     const sql = `update ev_users set ? where id=?`
-    db.query(sql, [req.body, req.body.id], (err, results) => {
+    db.query(sql, [req.body, req.auth.id], (err, results) => {
         if (err) {
             return res.cc(err)
         }
@@ -42,6 +42,35 @@ exports.updatePassword = (req, res) => {
         if (!compareResult) {
             return res.cc('旧密码错误')
         }
-        res.cc('ok')
+        const sql = `update ev_users set password=? where id=?`
+        const newPwd = bcrypt.hashSync(req.body.newPwd, 10)
+        db.query(sql, [newPwd, req.auth.id], (err, results) => {
+            if (err) {
+                return res.cc(err)
+            }
+            if (results.affectedRows !== 1) {
+                return res.cc('更新密码失败')
+            }
+            res.cc('密码更新成功', 0)
+        })
     })
+}
+exports.updateAvatar = (req, res) => {
+
+    const newAvatar = req.body.avatar;
+
+    if (!newAvatar) {
+        return res.cc('头像数据不能为空');
+    }
+
+    const sql = `UPDATE ev_users SET user_pic=? WHERE id=?`;
+    db.query(sql, [newAvatar, req.auth.id], (err, results) => {
+        if (err) {
+            return res.cc(err);
+        }
+        if (results.affectedRows !== 1) {
+            return res.cc('更新头像失败');
+        }
+        res.cc('头像更新成功', 0);
+    });
 }
